@@ -28,8 +28,6 @@ public class Crawler {
 		// Hard code validUrl for faster output for now
 		URL validURL = new URL(
 				"http://mail-archives.apache.org/mod_mbox/maven-users/201412");
-		
-		int count = 0;
 
 		do {
 			Document doc = jsoupDocument.getDocument(url.toString());
@@ -41,14 +39,9 @@ public class Crawler {
 					urlCollection.add(absURL);
 					urlQueue.add(absURL);
 					LOGGER.info("Crawled:" + absURL);
-					count++;
 				}
 			}
-			url = urlQueue.isEmpty() ? null : urlQueue.remove();
-			/*if (count > 20) {
-				return urlSet;
-			}*/
-		} while (url != null);
+		} while (!urlQueue.isEmpty() && (url = urlQueue.remove()) != null);
 
 		Collection<URL> filteredURLCollection = new HashSet<URL>();
 		for (URL filteredUrl : urlCollection) {

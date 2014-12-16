@@ -2,15 +2,12 @@ package com.imaginea.mailcrawler;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -62,7 +59,10 @@ public class ApacheMailDownloader {
 								+ line);
 						urlCollection.add(new URL(line));
 					}
-					LOGGER.info("Deleted prev run file" + resumeFile.delete());
+
+					if (resumeFile.delete()) {
+						LOGGER.info("Deleted previous run file");
+					}
 				}
 			} else {
 				urlCollection = this.crawler.crawl(
@@ -73,7 +73,8 @@ public class ApacheMailDownloader {
 			if (resumeFile.exists()) {
 				resumeFile.delete();
 			}
-			urlCollection = this.crawler.crawl(new URL(configuration.getBaseURL()),
+			urlCollection = this.crawler.crawl(
+					new URL(configuration.getBaseURL()),
 					configuration.getPattern());
 		}
 		this.downloader.download(urlCollection, destination);
@@ -109,7 +110,7 @@ public class ApacheMailDownloader {
 
 	public static void main(String args[]) throws MalformedURLException,
 			IOException {
-		final int args_num = 2;
+		int args_num = 2;
 		if (args.length == args_num) {
 			String outDirPath = args[0];
 
