@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -49,7 +50,7 @@ public class ApacheMailDownloader {
 			boolean resume) throws MalformedURLException, IOException {
 
 		File resumeFile = new File("resume");
-		Set<URL> urlSet = new HashSet<URL>();
+		Collection<URL> urlCollection = new HashSet<URL>();
 
 		if (resume) {
 			if (resumeFile.exists()) {
@@ -59,12 +60,12 @@ public class ApacheMailDownloader {
 					while ((line = bReader.readLine()) != null) {
 						LOGGER.info("pulled from previous unfinished run"
 								+ line);
-						urlSet.add(new URL(line));
+						urlCollection.add(new URL(line));
 					}
 					LOGGER.info("Deleted prev run file" + resumeFile.delete());
 				}
 			} else {
-				urlSet = this.crawler.crawl(
+				urlCollection = this.crawler.crawl(
 						new URL(configuration.getBaseURL()),
 						configuration.getPattern());
 			}
@@ -72,10 +73,10 @@ public class ApacheMailDownloader {
 			if (resumeFile.exists()) {
 				resumeFile.delete();
 			}
-			urlSet = this.crawler.crawl(new URL(configuration.getBaseURL()),
+			urlCollection = this.crawler.crawl(new URL(configuration.getBaseURL()),
 					configuration.getPattern());
 		}
-		this.downloader.download(urlSet, destination);
+		this.downloader.download(urlCollection, destination);
 	}
 
 	public static class Configuration {

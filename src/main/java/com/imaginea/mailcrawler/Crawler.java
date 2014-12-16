@@ -2,6 +2,7 @@ package com.imaginea.mailcrawler;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -20,12 +21,12 @@ public class Crawler {
 	private final String anchor_tag = "a";
 	private final String abs_href = "abs:href";
 
-	public Set<URL> crawl(URL url, Pattern pattern) throws IOException {
-		Set<URL> urlSet = new HashSet<URL>();
+	public Collection<URL> crawl(URL url, Pattern pattern) throws IOException {
+		Collection<URL> urlCollection = new HashSet<URL>();
 		Queue<URL> urlQueue = new LinkedList<URL>();
 		JsoupDocument jsoupDocument = new JsoupDocument();
 		// Hard code validUrl for faster output for now
-		URL validUrl = new URL(
+		URL validURL = new URL(
 				"http://mail-archives.apache.org/mod_mbox/maven-users/201412");
 		
 		int count = 0;
@@ -34,12 +35,12 @@ public class Crawler {
 			Document doc = jsoupDocument.getDocument(url.toString());
 			Elements links = doc.select(anchor_tag);
 			for (Element link : links) {
-				URL absUrl = new URL(link.attr(abs_href));
-				if (absUrl.toString().contains(validUrl.toString())
-						&& !urlSet.contains(absUrl)) {
-					urlSet.add(absUrl);
-					urlQueue.add(absUrl);
-					LOGGER.info("Crawled:" + absUrl);
+				URL absURL = new URL(link.attr(abs_href));
+				if (absURL.toString().contains(validURL.toString())
+						&& !urlCollection.contains(absURL)) {
+					urlCollection.add(absURL);
+					urlQueue.add(absURL);
+					LOGGER.info("Crawled:" + absURL);
 					count++;
 				}
 			}
@@ -49,13 +50,13 @@ public class Crawler {
 			}*/
 		} while (url != null);
 
-		Set<URL> filteredUrlSet = new HashSet<URL>();
-		for (URL filteredUrl : urlSet) {
+		Collection<URL> filteredURLCollection = new HashSet<URL>();
+		for (URL filteredUrl : urlCollection) {
 			Matcher matcher = pattern.matcher(filteredUrl.toString());
 			if (matcher.matches()) {
-				filteredUrlSet.add(filteredUrl);
+				filteredURLCollection.add(filteredUrl);
 			}
 		}
-		return filteredUrlSet;
+		return filteredURLCollection;
 	}
 }
