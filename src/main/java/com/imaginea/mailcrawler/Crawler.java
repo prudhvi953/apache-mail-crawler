@@ -24,9 +24,11 @@ public class Crawler {
 		Set<URL> urlSet = new HashSet<URL>();
 		Queue<URL> urlQueue = new LinkedList<URL>();
 		JsoupDocument jsoupDocument = new JsoupDocument();
-		// Hard code validUrl for faster output for 
+		// Hard code validUrl for faster output for now
 		URL validUrl = new URL(
 				"http://mail-archives.apache.org/mod_mbox/maven-users/201412");
+		
+		int count = 0;
 
 		do {
 			Document doc = jsoupDocument.getDocument(url.toString());
@@ -37,10 +39,14 @@ public class Crawler {
 						&& !urlSet.contains(absUrl)) {
 					urlSet.add(absUrl);
 					urlQueue.add(absUrl);
-					Crawler.LOGGER.info("Crawled:" + absUrl);
+					LOGGER.info("Crawled:" + absUrl);
+					count++;
 				}
 			}
 			url = urlQueue.isEmpty() ? null : urlQueue.remove();
+			/*if (count > 20) {
+				return urlSet;
+			}*/
 		} while (url != null);
 
 		Set<URL> filteredUrlSet = new HashSet<URL>();

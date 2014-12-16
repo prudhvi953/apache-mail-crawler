@@ -27,9 +27,8 @@ public class FileBasedDownloadDesitnation implements DownloadDestination {
 		}
 		
 		//TODO Use Autoclosable
-		OutputStream outputStream = new FileOutputStream(outputFile);
+		try (OutputStream outputStream = new FileOutputStream(outputFile)) {
 		IOUtils.copy(inputStream, outputStream);
-		inputStream.close();
-		outputStream.close();
+		}
 	}
 }

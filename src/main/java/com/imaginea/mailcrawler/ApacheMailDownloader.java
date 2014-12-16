@@ -1,8 +1,14 @@
 package com.imaginea.mailcrawler;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -39,12 +45,36 @@ public class ApacheMailDownloader {
 		this.downloader = downloader;
 	}
 
-	public void download(String year, DownloadDestination destination)
-			throws MalformedURLException, IOException {
+	public void download(String year, DownloadDestination destination,
+			boolean resume) throws MalformedURLException, IOException {
 
-		Set<URL> urlSet = this.crawler
-				.crawl(new URL(configuration.getBaseURL()),
+		File resumeFile = new File("resume");
+		Set<URL> urlSet = new HashSet<URL>();
+
+		if (resume) {
+			if (resumeFile.exists()) {
+				try (BufferedReader bReader = new BufferedReader(
+						new FileReader(resumeFile))) {
+					String line;
+					while ((line = bReader.readLine()) != null) {
+						LOGGER.info("pulled from previous unfinished run"
+								+ line);
+						urlSet.add(new URL(line));
+					}
+					LOGGER.info("Deleted prev run file" + resumeFile.delete());
+				}
+			} else {
+				urlSet = this.crawler.crawl(
+						new URL(configuration.getBaseURL()),
 						configuration.getPattern());
+			}
+		} else {
+			if (resumeFile.exists()) {
+				resumeFile.delete();
+			}
+			urlSet = this.crawler.crawl(new URL(configuration.getBaseURL()),
+					configuration.getPattern());
+		}
 		this.downloader.download(urlSet, destination);
 	}
 
@@ -78,7 +108,7 @@ public class ApacheMailDownloader {
 
 	public static void main(String args[]) throws MalformedURLException,
 			IOException {
-		final int args_num = 1;
+		final int args_num = 2;
 		if (args.length == args_num) {
 			String outDirPath = args[0];
 
@@ -93,9 +123,10 @@ public class ApacheMailDownloader {
 
 			FileBasedDownloadDesitnation destination = new FileBasedDownloadDesitnation(
 					outDirPath);
-			apacheMailDownloader.download("2014", destination);
+			apacheMailDownloader.download("2014", destination,
+					Boolean.valueOf(args[1]));
 		} else {
-			throw new IllegalArgumentException("One argument must be provided");
+			throw new IllegalArgumentException("Two arguments must be provided");
 		}
 	}
 }
